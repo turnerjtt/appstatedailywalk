@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>My Daily Walk Through App State</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Leaflet map styles -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+        }
+
+        /* the map fills the whole page */
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        /* title box in the top-left corner */
+        #title {
+            position: absolute;
+            top: 10px;
+            left: 50px;
+            z-index: 1000;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+        }
+
+        #title h1 {
+            margin: 0;
+            font-size: 1.4em;
+        }
+
+        #title p {
+            margin: 4px 0 0;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="title">
+        <h1>My Daily Walk Through App State</h1>
+        <p>A 0.6 mile walk from Kidd Brewer Stadium, past the Duck Pond and<br>
+            Plemmons Student Union, to Blue Deer on King Street.<br>
+            Hover over a marker to see its name.</p>
+        <p>Map by Joshua Turner &middot; <a href="https://www.appstate.edu/" target="_blank">Appalachian State University</a></p>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- 1. Leaflet library, 2. our route data -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="data/route.js"></script>
+
+    <script>
+        // create the map
+        var map = L.map('map');
+
+        // basemap
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // the walking route line
+        var myRoute = L.geoJson(data, {
+            filter: function (feature) {
+                return feature.geometry.type == "LineString";
+            },
+            style: {
+                color: "#d7301f",
+                weight: 5,
+                opacity: 0.9,
+                dashArray: "10, 6"
+            }
+        }).addTo(map);
+
+        // the stops, with their name shown on hover
+        var myStops = L.geoJson(data, {
+            filter: function (feature) {
+                return feature.geometry.type == "Point";
+            },
+            onEachFeature: function (feature, layer) {
+                layer.bindTooltip(feature.properties.name);
+            }
+        }).addTo(map);
+
+        // zoom the map to fit the trail
+        map.fitBounds(myRoute.getBounds(), { padding: [30, 30] });
+    </script>
+
+</body>
+
+</html>
